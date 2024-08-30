@@ -10,3 +10,4 @@ class TextNode():
     
     def __repr__(self):
         return (self.text, self.text_type, self.url)
+    
