@@ -1,5 +1,5 @@
 class HTMLNode():
-    def __init__(self, tag=None, value=None, children=[None], props=None):
+    def __init__(self, tag=None, value=None, children=None, props=None):
         self.tag = tag
         self.value = value
         self.children = children
@@ -20,10 +20,3 @@ class HTMLNode():
     def __repr__(self):
         return(self.tag, self.value, self.children, self.props)
     
-
-# def test():
-#     node = HTMLNode("h1", "This is a text node", None, {"href": "https://www.google.com", "h1": "normal"})
-
-#     print(f'|{node.props_to_html()}|')
-
-# test()
