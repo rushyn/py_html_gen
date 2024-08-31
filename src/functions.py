@@ -107,3 +107,15 @@ def text_to_textnodes(text):
     nodes = split_nodes_image(nodes)
     nodes = split_nodes_link(nodes)
     return nodes
+
+
+def markdown_to_blocks(markdown):
+    text_blocks = markdown.split("\n\n")
+    for i in range (0, len(text_blocks)):
+        text_blocks[i] = text_blocks[i].lstrip()
+    for text in text_blocks:
+        if text == "":
+            text_blocks.remove(text)
+
+    return text_blocks
+    
