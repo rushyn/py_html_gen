@@ -51,10 +51,63 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
 
 def extract_markdown_images(text):
-    return re.findall(r"\[(.*?)\]\((.*?)\)", text)
+    return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
 
 
 def extract_markdown_links(text):
     return re.findall(r"\[(.*?)\]\((.*?)\)", text)
 
+def split_nodes_image(old_nodes):
+    new_nodes = []
+    for old_node in old_nodes:
+        link_list = extract_markdown_images(old_node.text)
+        if len(link_list) == 0:
+            new_nodes.append(TextNode(old_node.text, TextCode.text))
+            continue
+        old_text = old_node.text
+        for link in link_list:
+            text = ((old_text.split(f"![{link[0]}]({link[1]})", 1))[0])
+            if text != "":
+                new_nodes.append(TextNode(text, TextCode.text))
+            old_text = old_text.replace(text, "", 1)
+            new_nodes.append(TextNode(link[0], TextCode.image, link[1]))
+            old_text = old_text.replace(f"![{link[0]}]({link[1]})", "", 1)
+        if old_text != "":
+            new_nodes.append(TextNode(old_text, TextCode.text))
 
+    return new_nodes
+
+
+def split_nodes_link(old_nodes):
+    new_nodes = []
+    for old_node in old_nodes:
+        link_list = extract_markdown_links(old_node.text)
+        if len(link_list) == 0:
+            new_nodes.append(TextNode(old_node.text, TextCode.text))
+            continue
+        old_text = old_node.text
+        for link in link_list:
+            text = ((old_text.split(f"[{link[0]}]({link[1]})", 1))[0])
+            if text != "":
+                new_nodes.append(TextNode(text, TextCode.text))
+            old_text = old_text.replace(text, "", 1)
+            new_nodes.append(TextNode(link[0], TextCode.link, link[1]))
+            old_text = old_text.replace(f"[{link[0]}]({link[1]})", "", 1)
+        if old_text != "":
+            new_nodes.append(TextNode(old_text, TextCode.text))
+
+    return new_nodes
+    
+
+nodes = [
+        TextNode(
+            "this is a funny screen cap ![rick roll](https://i.imgur.com/capsscren.jpg) thats all for now",
+            TextCode.text,
+        ),
+]
+
+
+new_nodes = split_nodes_image(nodes)
+
+for node in new_nodes:
+    print(f"{node.text} | {node.text_type} | {node.url}")
