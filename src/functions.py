@@ -1,21 +1,56 @@
 from textnode import *
 from htmlnode import *
 from leafnode import *
-
+from constant import *
 
 def text_node_to_html_node(text_node):
     match text_node.text_type:
-        case "text":
+        case TextCode.text:
             return LeafNode(None, text_node.text)
-        case "bold":
+        case TextCode.bold:
             return LeafNode("b", text_node.text)
-        case "italic":
+        case TextCode.italic:
             return LeafNode("i", text_node.text)
-        case "code":
+        case TextCode.code:
             return LeafNode("code", text_node.text)
-        case "link":
+        case TextCode.link:
             return LeafNode("a", text_node.text, {"href": text_node.url})
-        case "image":
+        case TextCode.image:
             return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
         case _:
             raise ValueError ("Invalid text type")
+        
+def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    new_nodes = []
+    for node in old_nodes:
+        if node.text_type == TextCode.text:
+
+            old_node_text = node.text
+
+            while len(old_node_text) != 0:
+
+                if old_node_text.find(delimiter) == -1:
+                    new_nodes.append(TextNode(old_node_text, "text"))
+                    old_node_text = ""
+
+                elif old_node_text.find(delimiter) > 0:
+                    new_nodes.append(TextNode(old_node_text[:(old_node_text.find(delimiter))], "text"))
+                    old_node_text = old_node_text[(old_node_text.find(delimiter)):]
+
+                else:
+                    old_node_text = old_node_text[len(delimiter):]
+                    if old_node_text.find(delimiter) == -1:
+                        raise Exception ("Termineter for text_type not found in string.")
+                    new_nodes.append(TextNode(old_node_text[:(old_node_text.find(delimiter))], text_type))
+                    old_node_text = old_node_text[(old_node_text.find(delimiter)) + len(delimiter):]
+        else:
+            new_nodes.append(node)
+
+    return new_nodes
+
+    # for node in new_nodes:
+    #      print("===========")
+    #      print(f"{node.text} | {node.text_type}")
+
+#split_nodes_delimiter([TextNode("This is text with `a` `code block` word", "text")], "`", "code")
+

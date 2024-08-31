@@ -4,7 +4,7 @@ from textnode import *
 from htmlnode import *
 from leafnode import *
 
-class TestTextNode(unittest.TestCase):    
+class Text_Node_To_Html_Node(unittest.TestCase):    
     def test_conversion(self):
         text_type_text      = TextNode("simple words for simpe text", "text")
         text_type_bold      = TextNode("WE ARE GOING TO WIN!!!", "bold")
