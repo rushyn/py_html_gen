@@ -1,3 +1,4 @@
+import re
 from textnode import *
 from htmlnode import *
 from leafnode import *
@@ -48,9 +49,12 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
     return new_nodes
 
-    # for node in new_nodes:
-    #      print("===========")
-    #      print(f"{node.text} | {node.text_type}")
 
-#split_nodes_delimiter([TextNode("This is text with `a` `code block` word", "text")], "`", "code")
+def extract_markdown_images(text):
+    return re.findall(r"\[(.*?)\]\((.*?)\)", text)
+
+
+def extract_markdown_links(text):
+    return re.findall(r"\[(.*?)\]\((.*?)\)", text)
+
 
