@@ -55,14 +55,14 @@ def extract_markdown_images(text):
 
 
 def extract_markdown_links(text):
-    return re.findall(r"\[(.*?)\]\((.*?)\)", text)
+    return re.findall(r"(?<!!)\[(.*?)\]\((.*?)\)", text)
 
 def split_nodes_image(old_nodes):
     new_nodes = []
     for old_node in old_nodes:
         link_list = extract_markdown_images(old_node.text)
         if len(link_list) == 0:
-            new_nodes.append(TextNode(old_node.text, TextCode.text))
+            new_nodes.append(TextNode(old_node.text,old_node.text_type, old_node.url))
             continue
         old_text = old_node.text
         for link in link_list:
@@ -83,7 +83,7 @@ def split_nodes_link(old_nodes):
     for old_node in old_nodes:
         link_list = extract_markdown_links(old_node.text)
         if len(link_list) == 0:
-            new_nodes.append(TextNode(old_node.text, TextCode.text))
+            new_nodes.append(TextNode(old_node.text, old_node.text_type, old_node.url))
             continue
         old_text = old_node.text
         for link in link_list:
@@ -99,15 +99,11 @@ def split_nodes_link(old_nodes):
     return new_nodes
     
 
-nodes = [
-        TextNode(
-            "this is a funny screen cap ![rick roll](https://i.imgur.com/capsscren.jpg) thats all for now",
-            TextCode.text,
-        ),
-]
-
-
-new_nodes = split_nodes_image(nodes)
-
-for node in new_nodes:
-    print(f"{node.text} | {node.text_type} | {node.url}")
+def text_to_textnodes(text):
+    nodes = [TextNode(text, TextCode.text)]
+    nodes = split_nodes_delimiter(nodes, "**", TextCode.bold)
+    nodes = split_nodes_delimiter(nodes, "*", TextCode.italic)
+    nodes = split_nodes_delimiter(nodes, "`", TextCode.code)
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    return nodes

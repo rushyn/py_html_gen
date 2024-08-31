@@ -115,17 +115,81 @@ class Test_Split_Nodes(unittest.TestCase):
                     ["obi wan",                     TextCode.image,     "https://i.imgur.com/fJRm4Vk.jpeg"],
                     ["this is a funny screen cap ", TextCode.text,      None],
                     ["rick roll",                   TextCode.image,     "https://i.imgur.com/capsscren.jpg"],
-                    [" thats all for now",           TextCode.text,      None],
+                    [" thats all for now",          TextCode.text,      None],
                     ["no image here",               TextCode.text,      None],
                     ["steam",                       TextCode.image,     "http://nowimage.com/Castle_Geyser.jpg"],
                 ]
         i = 0
         for node in new_nodes:
-            print(i)
             self.assertEqual(node.text,        results[i][0])
             self.assertEqual(node.text_type,   results[i][1])
             self.assertEqual(node.url,         results[i][2])
-            i += 1   
+            i += 1
+
+    def test_image_and_link(self):
+        node = [TextNode("This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)", TextCode.text)]
+        image_results = [
+                        ["This is **text** with an *italic* word and a `code block` and an ", TextCode.text, None],
+                        ["obi wan image", TextCode.image, "https://i.imgur.com/fJRm4Vk.jpeg"],
+                        [" and a [link](https://boot.dev)", TextCode.text, None]
+        ]
+        link_results = [
+                        ["This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a ", TextCode.text, None],
+                        ["link", TextCode.link, "https://boot.dev"]
+        ]
+
+        images_nodes = split_nodes_image(node)
+        link_nodes = split_nodes_link(node)
+        self.assertEqual(len(images_nodes), 3)
+        self.assertEqual(len(link_nodes), 2)
+
+        i = 0
+        for node in images_nodes:
+            self.assertEqual(node.text,        image_results[i][0])
+            self.assertEqual(node.text_type,   image_results[i][1])
+            self.assertEqual(node.url,         image_results[i][2])
+            i += 1
+        
+
+        i = 0
+        for node in link_nodes:
+            self.assertEqual(node.text,        link_results[i][0])
+            self.assertEqual(node.text_type,   link_results[i][1])
+            self.assertEqual(node.url,         link_results[i][2])
+            i += 1
+
+        new_images_nodes = split_nodes_image(link_nodes)
+        new_link_nodes = split_nodes_link(images_nodes)
+        new_image_results = [
+                ["This is **text** with an *italic* word and a `code block` and an ", TextCode.text, None],
+                ["obi wan image", TextCode.image, "https://i.imgur.com/fJRm4Vk.jpeg"],
+                [" and a ", TextCode.text, None],
+                ["link", TextCode.link, "https://boot.dev"]
+        ]
+        new_link_results = [
+                ["This is **text** with an *italic* word and a `code block` and an ", TextCode.text, None],
+                ["obi wan image", TextCode.image, "https://i.imgur.com/fJRm4Vk.jpeg"],
+                [" and a ", TextCode.text, None],
+                ["link", TextCode.link, "https://boot.dev"]
+        ]
+
+        i = 0
+        for node in new_images_nodes:
+            self.assertEqual(node.text,        new_image_results[i][0])
+            self.assertEqual(node.text_type,   new_image_results[i][1])
+            self.assertEqual(node.url,         new_image_results[i][2])
+            i += 1
+        
+
+
+        i = 0
+        for node in new_link_nodes:
+            self.assertEqual(node.text,        new_link_results[i][0])
+            self.assertEqual(node.text_type,   new_link_results[i][1])
+            self.assertEqual(node.url,         new_link_results[i][2])
+            i += 1
+
+    
 
 if __name__ == "__main__":
     unittest.main()
