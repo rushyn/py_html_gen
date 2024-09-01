@@ -2,6 +2,7 @@ import re
 from textnode import *
 from htmlnode import *
 from leafnode import *
+from parentnode import *
 from constant import *
 
 def text_node_to_html_node(text_node):
@@ -123,19 +124,124 @@ def block_to_block_type (markdown):
     if markdown[0] == "#":
         for i in range (1, 7):
             if markdown[i] != "#":
-                return "h" + str(i)
+                return BlockCode.heading + str(i)
     
     if markdown[:3] == "```" and markdown[-3:] == "```":
-        return "code"
+        return BlockCode.code
     
     if markdown[0] == ">":
-        return "blockquote"
+        return BlockCode.blockquote
     
     if markdown[0] == "*" or markdown[0] == "-":
-        return "ul"
+        return BlockCode.ordered_list
 
     if markdown[:3] == "1. ":
-        return "ol"  
+        return BlockCode.unordered_list
     
-    return "p"
+    return BlockCode.paragraphs
 
+def block_format(block, type):
+    if BlockCode.heading in type:
+        level = int(type[1]) + 1
+        type = "h"
+    match type:
+        case BlockCode.heading:
+            return block[level:].split("\n")
+        case BlockCode.code:
+            return block[3:-3].split("\n")
+        case BlockCode.blockquote:
+            block = block.split("\n")
+            for i in range(0, len(block)):
+                block[i] = block[i][2:]
+            return block
+        case BlockCode.ordered_list:
+            block = block.split("\n")
+            for i in range(0, len(block)):
+                block[i] = block[i][2:]
+            return block
+        case BlockCode.unordered_list:
+            block = block.split("\n")
+            for i in range(0, len(block)):
+                block[i] = block[i][3:]
+            return block
+        case BlockCode.paragraphs:
+            return block.split("\n")
+    
+
+
+
+def text_to_children(block):
+    block_type = block_to_block_type(block)
+    string_list = block_format(block, block_type)
+    text_nodes = []
+    leaf_nodes = []
+    for string in string_list:
+        text_nodes = text_to_textnodes(string)
+        for node in text_nodes:
+            leaf_nodes.append(text_node_to_html_node(node))
+    if block_type in [BlockCode.code, BlockCode.unordered_list, BlockCode.ordered_list]:
+        for node in leaf_nodes:
+            if node.tag == None:
+                match block_type:
+                    case BlockCode.code:
+                        node.tag = "pre"
+                    case BlockCode.unordered_list:
+                        node.tag = "li"
+                    case BlockCode.ordered_list:
+                        node.tag = "li"
+    return leaf_nodes
+
+
+
+
+def markdown_to_html_node(markdown):
+    markdown_blocks = markdown_to_blocks(markdown)
+    nodes = []
+    for block in markdown_blocks:
+        nodes.append(ParentNode(block_to_block_type(block), text_to_children(block)))
+    return HTMLNode("div", None, nodes)
+
+
+markdown = (
+            "# Heading of All Headings!\n"
+            "\n"
+            "###### Heading of All Headings!\n"
+            "\n"
+            "She didn't understand how changed **worked**. When she looked at *today* compared to yesterday.\n"
+            "It went through such rapid contortions that the little bear was forced to change his hold on it so many times he became confused in the darkness.\n"
+            "\n"
+            "This is a paragraph with a [link](https://www.google.com).\n"
+            "\n"
+            "![alt text for image](http://image.glob/.info.jpg)\n"
+            "\n"
+            "* Cat 1\n"
+            "* Cat 2\n"
+            "* Cat 3\n"
+            "\n"
+            "1. Dog 1\n"
+            "2. Dog 2\n"
+            "3. Dog 3\n"
+            "\n"
+            "> Today is a good day.\n"
+            "\n"
+            "```\n"
+            "for item in something:\n"
+            "```"
+            )
+
+# node0 = markdown_to_html_node(markdown)
+
+
+# print("++++++++++++++++++++++")
+# print("++++++++++++++++++++++")
+# print("++++++++++++++++++++++")
+# print("++++++++++++++++++++++")
+# print(f"{node0.tag} | {node0.value} | {node0.props}")
+# for node in node0.children:
+#     print("-----------------")
+#     print(len(node.children))
+#     print(f"{node.tag} | {node.value} | {node.props}")
+#     print("-----------------")
+#     for n in node.children:
+#         print(f"{n.tag} | {n.value} | {n.props}")
+# print("++++++++++++++++++++++")

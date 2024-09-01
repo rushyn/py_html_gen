@@ -46,7 +46,11 @@ class Test_text_to_textnodes(unittest.TestCase):
         for i in range(0, len(nodes)):
             self.assertEqual(nodes[i], result_nodes[i])
 
-
+    def test_link_only(self):
+        text = "![alt text for image](http://image.glob/.info.jpg)\n"
+        result_node = TextNode("alt text for image",       TextCode.image, "http://image.glob/.info.jpg")
+        nodes = text_to_textnodes(text)
+        self.assertEqual(nodes[0], result_node)
         
 if __name__ == "__main__":
     unittest.main()
