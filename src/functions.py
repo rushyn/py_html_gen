@@ -119,3 +119,23 @@ def markdown_to_blocks(markdown):
 
     return text_blocks
     
+def block_to_block_type (markdown):
+    if markdown[0] == "#":
+        for i in range (1, 7):
+            if markdown[i] != "#":
+                return "h" + str(i)
+    
+    if markdown[:3] == "```" and markdown[-3:] == "```":
+        return "code"
+    
+    if markdown[0] == ">":
+        return "blockquote"
+    
+    if markdown[0] == "*" or markdown[0] == "-":
+        return "ul"
+
+    if markdown[:3] == "1. ":
+        return "ol"  
+    
+    return "p"
+

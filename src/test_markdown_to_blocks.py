@@ -1,7 +1,5 @@
 import unittest 
 from functions import markdown_to_blocks
-from constant import TextCode
-from textnode import TextNode
 
 class Test_Markdown_To_Blocks(unittest.TestCase):
     def test_markdown_to_blocks_basic(self):
