@@ -176,7 +176,10 @@ def line_type(block_type):
             case BlockCode.unordered_list:
                 return "li"
             case BlockCode.ordered_list:
-                return "li"    
+                return "li"   
+    return "p"
+
+
 
 def text_to_children(block):
     block_type = block_to_block_type(block)
@@ -224,14 +227,15 @@ def generate_page(from_path, template_path, dest_path):
         file.close()
     
     html_main_node = markdown_to_html_node(markdown)
+
     html = html_main_node.to_html()
     titel = extract_title(markdown)
     template = template.replace("{{ Content }}", html, 1)
     template = template.replace("{{ Title }}", titel, 1)
-    #print(template)
-    
-    if os.path.exists(dest_path[:dest_path.rindex("/")]):
-        os.mkdir(dest_path[:dest_path.rindex("/")])
+
+    if not os.path.exists(dest_path[:dest_path.rindex("/") + 1]):
+        os.mkdir(dest_path[:dest_path.rindex("/") + 1])
     with open(dest_path, "w") as page:
         page.write(template)
         page.close()
+

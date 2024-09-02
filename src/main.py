@@ -10,8 +10,8 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
     for item in list:
         if os.path.isdir(dir_path_content + item) == True:
             generate_pages_recursive(dir_path_content + item + "/", template_path, dest_dir_path + item +"/")
-        elif item[:-3] == ".md":
-            generate_page(dir_path_content + item, template_path, dest_dir_path + item)
+        elif item[-3:] == ".md":
+            generate_page(dir_path_content + item, template_path, dest_dir_path + item[:-3] + ".html")
 
 
 
@@ -33,7 +33,7 @@ def delete_public():
 
 def main():
     delete_public()
-    generate_pages_recursive("./content/index.md", "./template.html", "./public/index.html")
+    generate_pages_recursive("./content/", "./template.html", "./public/")
 
 
 main()

@@ -1,4 +1,3 @@
-from pprint import pprint
 import unittest 
 from functions import markdown_to_html_node
 
@@ -40,13 +39,13 @@ class test_markdown_to_html_node(unittest.TestCase):
                     ["h6", None, None],
                     [None, "Heading of All Headings!", None],
                     ["p", None, None],
-                    [None, None, None],
+                    ["p", None, None],
                     [None, "She didn't understand how changed ", None],
                     ["b", "worked", None],
                     [None, ". When she looked at ", None],
                     ["i", "today", None],
                     [None, " compared to yesterday.", None],
-                    [None, None, None],
+                    ["p", None, None],
                     [None, "It went through such rapid contortions that the little bear was forced to change his hold on it so many times he became confused in the darkness.", None],
                     ["p", None, None],
                     [None, "This is a paragraph with a ", None],
@@ -75,6 +74,8 @@ class test_markdown_to_html_node(unittest.TestCase):
                 ]
         html_main = markdown_to_html_node(markdown)
 
+
+        
         i = 0
         #print(i)
         self.assertEqual(html_main.tag,     results[i][0])
