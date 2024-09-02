@@ -1,3 +1,4 @@
+from pprint import pprint
 import unittest 
 from functions import markdown_to_html_node
 
@@ -39,11 +40,13 @@ class test_markdown_to_html_node(unittest.TestCase):
                     ["h6", None, None],
                     [None, "Heading of All Headings!", None],
                     ["p", None, None],
+                    [None, None, None],
                     [None, "She didn't understand how changed ", None],
                     ["b", "worked", None],
                     [None, ". When she looked at ", None],
                     ["i", "today", None],
                     [None, " compared to yesterday.", None],
+                    [None, None, None],
                     [None, "It went through such rapid contortions that the little bear was forced to change his hold on it so many times he became confused in the darkness.", None],
                     ["p", None, None],
                     [None, "This is a paragraph with a ", None],
@@ -51,21 +54,27 @@ class test_markdown_to_html_node(unittest.TestCase):
                     [None, ".", None],
                     ["p", None, None],
                     ["img", "", {'src': 'http://image.glob/.info.jpg', 'alt': 'alt text for image'}],
-                    ["ul", None, None],
-                    ["li", "Cat 1", None],
-                    ["li", "Cat 2", None],
-                    ["li", "Cat 3", None],
                     ["ol", None, None],
-                    ["li", "Dog 1", None],
-                    ["li", "Dog 2", None],
-                    ["li", "Dog 3", None],
+                    ["li", None, None],
+                    [None, "Cat 1", None],
+                    ["li", None, None],
+                    [None, "Cat 2", None],
+                    ["li", None, None],
+                    [None, "Cat 3", None],
+                    ["ul", None, None],
+                    ["li", None, None],
+                    [None, "Dog 1", None],
+                    ["li", None, None],
+                    [None, "Dog 2", None],
+                    ["li", None, None],
+                    [None, "Dog 3", None],
                     ["blockquote", None, None],
                     [None, "Today is a good day.", None],
                     ["code", None, None],
-                    ["pre", "for item in something:", None],
+                    [None, "for item in something:", None],
                 ]
         html_main = markdown_to_html_node(markdown)
-        
+
         i = 0
         #print(i)
         self.assertEqual(html_main.tag,     results[i][0])
@@ -78,12 +87,20 @@ class test_markdown_to_html_node(unittest.TestCase):
             self.assertEqual(html_node.value,   results[i][1])
             self.assertEqual(html_node.props,   results[i][2])
             i += 1
-            for leaf_node in html_node.children:
+            for node in html_node.children:
                 #print(i)
-                self.assertEqual(leaf_node.tag,     results[i][0])
-                self.assertEqual(leaf_node.value,   results[i][1])
-                self.assertEqual(leaf_node.props,   results[i][2])
+                self.assertEqual(node.tag,     results[i][0])
+                self.assertEqual(node.value,   results[i][1])
+                self.assertEqual(node.props,   results[i][2])
                 i += 1
+                if node.children == None:
+                    continue
+                for n in node.children:
+                    #print(i)
+                    self.assertEqual(n.tag,     results[i][0])
+                    self.assertEqual(n.value,   results[i][1])
+                    self.assertEqual(n.props,   results[i][2])
+                    i += 1
 
 
 

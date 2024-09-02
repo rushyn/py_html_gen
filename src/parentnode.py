@@ -13,7 +13,7 @@ class ParentNode(HTMLNode):
     def to_html(self):
         if self.tag == None:
             raise ValueError ("self.tag is NONE")
-        if self.children == [None]:
+        if self.children == None:
             raise ValueError ("Must have self.children")
         return (f'<{self.tag}>{"".join(list(node.to_html() for node in self.children))}</{self.tag}>')
     

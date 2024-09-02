@@ -31,8 +31,8 @@ class Test_Block_To_Block_Type(unittest.TestCase):
                     "h5",
                     "h6",
                     "p",
-                    "ul",
                     "ol",
+                    "ul",
                     "blockquote",
                     "code"
         ]

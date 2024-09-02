@@ -1,4 +1,5 @@
 import re
+import os
 from textnode import *
 from htmlnode import *
 from leafnode import *
@@ -30,7 +31,6 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             old_node_text = node.text
 
             while len(old_node_text) != 0:
-
                 if old_node_text.find(delimiter) == -1:
                     new_nodes.append(TextNode(old_node_text, "text"))
                     old_node_text = ""
@@ -113,11 +113,10 @@ def text_to_textnodes(text):
 def markdown_to_blocks(markdown):
     text_blocks = markdown.split("\n\n")
     for i in range (0, len(text_blocks)):
-        text_blocks[i] = text_blocks[i].lstrip()
+        text_blocks[i] = text_blocks[i].strip()
     for text in text_blocks:
         if text == "":
             text_blocks.remove(text)
-
     return text_blocks
     
 def block_to_block_type (markdown):
@@ -129,14 +128,14 @@ def block_to_block_type (markdown):
     if markdown[:3] == "```" and markdown[-3:] == "```":
         return BlockCode.code
     
-    if markdown[0] == ">":
+    if markdown[:2] == "> ":
         return BlockCode.blockquote
     
-    if markdown[0] == "*" or markdown[0] == "-":
-        return BlockCode.ordered_list
+    if markdown[:2] == "* " or markdown[:2] == "- ":
+        return BlockCode.unordered_list
 
     if markdown[:3] == "1. ":
-        return BlockCode.unordered_list
+        return BlockCode.ordered_list
     
     return BlockCode.paragraphs
 
@@ -146,50 +145,53 @@ def block_format(block, type):
         type = "h"
     match type:
         case BlockCode.heading:
-            return block[level:].split("\n")
+            return block[level:].strip().split("\n")
         case BlockCode.code:
-            return block[3:-3].split("\n")
+            return block[3:-3].strip().split("\n")
         case BlockCode.blockquote:
-            block = block.split("\n")
+            block = block.strip().split("\n")
             for i in range(0, len(block)):
                 block[i] = block[i][2:]
             return block
         case BlockCode.ordered_list:
-            block = block.split("\n")
-            for i in range(0, len(block)):
-                block[i] = block[i][2:]
-            return block
-        case BlockCode.unordered_list:
-            block = block.split("\n")
+            block = block.strip().split("\n")
             for i in range(0, len(block)):
                 block[i] = block[i][3:]
             return block
+        case BlockCode.unordered_list:
+            block = block.strip().split("\n")
+            for i in range(0, len(block)):
+                block[i] = block[i][2:]
+            return block
         case BlockCode.paragraphs:
-            return block.split("\n")
+            return block.strip().split("\n")
     
 
 
+def line_type(block_type):
+    if block_type in [BlockCode.code, BlockCode.unordered_list, BlockCode.ordered_list]:
+        match block_type:
+            case BlockCode.code:
+                return "pre"
+            case BlockCode.unordered_list:
+                return "li"
+            case BlockCode.ordered_list:
+                return "li"    
 
 def text_to_children(block):
     block_type = block_to_block_type(block)
     string_list = block_format(block, block_type)
     text_nodes = []
-    leaf_nodes = []
+    parent_nodes = []
     for string in string_list:
         text_nodes = text_to_textnodes(string)
+        leaf_nodes = []
         for node in text_nodes:
             leaf_nodes.append(text_node_to_html_node(node))
-    if block_type in [BlockCode.code, BlockCode.unordered_list, BlockCode.ordered_list]:
-        for node in leaf_nodes:
-            if node.tag == None:
-                match block_type:
-                    case BlockCode.code:
-                        node.tag = "pre"
-                    case BlockCode.unordered_list:
-                        node.tag = "li"
-                    case BlockCode.ordered_list:
-                        node.tag = "li"
-    return leaf_nodes
+        if len(string_list) == 1:
+            return leaf_nodes
+        parent_nodes.append(ParentNode(line_type(block_type), leaf_nodes))
+    return parent_nodes
 
 
 
@@ -199,49 +201,30 @@ def markdown_to_html_node(markdown):
     nodes = []
     for block in markdown_blocks:
         nodes.append(ParentNode(block_to_block_type(block), text_to_children(block)))
-    return HTMLNode("div", None, nodes)
+    return ParentNode("div", nodes)
 
 
-markdown = (
-            "# Heading of All Headings!\n"
-            "\n"
-            "###### Heading of All Headings!\n"
-            "\n"
-            "She didn't understand how changed **worked**. When she looked at *today* compared to yesterday.\n"
-            "It went through such rapid contortions that the little bear was forced to change his hold on it so many times he became confused in the darkness.\n"
-            "\n"
-            "This is a paragraph with a [link](https://www.google.com).\n"
-            "\n"
-            "![alt text for image](http://image.glob/.info.jpg)\n"
-            "\n"
-            "* Cat 1\n"
-            "* Cat 2\n"
-            "* Cat 3\n"
-            "\n"
-            "1. Dog 1\n"
-            "2. Dog 2\n"
-            "3. Dog 3\n"
-            "\n"
-            "> Today is a good day.\n"
-            "\n"
-            "```\n"
-            "for item in something:\n"
-            "```"
-            )
+def extract_title(markdown):
+    markdown = markdown.split("\n")
+    for line in markdown:
+        if line[:2] == "# ":
+            return (line[2:]).strip()
+    raise Exception ("No H1 header found!!!")
 
-# node0 = markdown_to_html_node(markdown)
-
-
-# print("++++++++++++++++++++++")
-# print("++++++++++++++++++++++")
-# print("++++++++++++++++++++++")
-# print("++++++++++++++++++++++")
-# print(f"{node0.tag} | {node0.value} | {node0.props}")
-# for node in node0.children:
-#     print("-----------------")
-#     print(len(node.children))
-#     print(f"{node.tag} | {node.value} | {node.props}")
-#     print("-----------------")
-#     for n in node.children:
-#         print(f"{n.tag} | {n.value} | {n.props}")
-# print("++++++++++++++++++++++")
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {template_path} using {dest_path}")
+    with open(from_path, "r") as file:
+        markdown = file.read()
+        file.close()
+    with open(template_path, "r") as file:
+        template = file.read()
+        file.close()
+    html_main_node = markdown_to_html_node(markdown)
+    html = html_main_node.to_html()
+    titel = extract_title(markdown)
+    template = template.replace("{{ Content }}", html, 1)
+    template = template.replace("{{ Title }}", titel, 1)
+    print(template)
+    with open(dest_path, "w") as page:
+        page.write(template)
+        page.close()

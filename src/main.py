@@ -3,6 +3,7 @@ import os
 from textnode import *
 from htmlnode import *
 from leafnode import *
+from functions import generate_page
 
 def copy(src, des):
     os.mkdir(des)
@@ -22,8 +23,7 @@ def delete_public():
 
 def main():
     delete_public()
+    generate_page("./content/index.md", "./template.html", "./public/index.html")
 
-    text_node = TextNode("This is a text node", "bold", "https://www.boot.dev")
-    print(text_node.__repr__())
 
-delete_public()
+main()

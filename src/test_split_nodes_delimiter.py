@@ -7,7 +7,7 @@ from functions import split_nodes_delimiter
 
 
 class Split_Nodes_Delimiter(unittest.TestCase):
-    def test_base_case(self):
+    def test_base_case1(self):
         nodes = split_nodes_delimiter([TextNode("This is text with `a` `code block` word", "text")], "`", "code")
         self.assertEqual(len(nodes), 5)
 
@@ -63,6 +63,19 @@ class Split_Nodes_Delimiter(unittest.TestCase):
             split_nodes_delimiter([TextNode("This is text with `a` `code block` word", "text")], "`", "code")
             self.assertEqual(str(context.exception), "Termineter for text_type not found in string.")
 
+    def test_base_case1(self):
+        nodes = split_nodes_delimiter([TextNode("**I like Tolkien**. Read my [first post here](/majesty) (sorry the link doesn't work yet)", "text")], "**", "bold")
+        self.assertEqual(len(nodes), 2)
+
+        results = [
+            ["I like Tolkien", "bold"],
+            [". Read my [first post here](/majesty) (sorry the link doesn't work yet)", "text"],
+        ]
+
+        i = 0
+        for node in nodes:
+            self.assertEqual([node.text, node.text_type], results[i])
+            i += 1
 
 if __name__ == "__main__":
      unittest.main()
