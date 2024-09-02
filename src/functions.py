@@ -212,19 +212,26 @@ def extract_title(markdown):
     raise Exception ("No H1 header found!!!")
 
 def generate_page(from_path, template_path, dest_path):
+    
     print(f"Generating page from {from_path} to {template_path} using {dest_path}")
+    
     with open(from_path, "r") as file:
         markdown = file.read()
         file.close()
+    
     with open(template_path, "r") as file:
         template = file.read()
         file.close()
+    
     html_main_node = markdown_to_html_node(markdown)
     html = html_main_node.to_html()
     titel = extract_title(markdown)
     template = template.replace("{{ Content }}", html, 1)
     template = template.replace("{{ Title }}", titel, 1)
-    print(template)
+    #print(template)
+    
+    if os.path.exists(dest_path[:dest_path.rindex("/")]):
+        os.mkdir(dest_path[:dest_path.rindex("/")])
     with open(dest_path, "w") as page:
         page.write(template)
         page.close()
